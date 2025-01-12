@@ -1,0 +1,151 @@
+swagger: "2.0"
+info:
+  description: API для работы с транзакциями
+  version: "1.0.0"
+  title: Транзакции API
+paths:
+  /create_transaction:
+    post:
+      summary: Создание транзакции
+      description: Создает новую транзакцию (депозит или снятие средств) для текущего пользователя.
+      parameters:
+        - name: amount
+          in: formData
+          description: Сумма транзакции.
+          required: true
+          type: number
+          format: float
+        - name: transaction_type
+          in: formData
+          description: Тип транзакции ("deposit" или "withdrawal").
+          required: true
+          type: string
+        - name: csrf_token
+          in: formData
+          description: CSRF токен.
+          required: true
+          type: string
+      responses:
+        200:
+          description: Успешное создание транзакции
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Transaction created successfully."
+        400:
+          description: Ошибка при создании транзакции (например, недостаточно средств).
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Недостаточно средств на балансе."
+  /cancel_transaction/{transaction_id}:
+    post:
+      summary: Отмена транзакции
+      description: Отменяет транзакцию с данным ID, если ее статус "pending".
+      parameters:
+        - name: transaction_id
+          in: path
+          required: true
+          type: integer
+          description: ID транзакции для отмены.
+      responses:
+        200:
+          description: Транзакция отменена успешно
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Transaction canceled successfully."
+        400:
+          description: Ошибка отмены транзакции (транзакция не в статусе "pending").
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Cannot cancel non-pending transaction."
+  /check_transaction/{transaction_id}:
+    get:
+      summary: Получение информации о транзакции
+      description: Возвращает данные о транзакции по ее ID.
+      parameters:
+        - name: transaction_id
+          in: path
+          required: true
+          type: integer
+          description: ID транзакции.
+      responses:
+        200:
+          description: Информация о транзакции
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 123
+              amount:
+                type: number
+                format: float
+                example: 100.0
+              commission:
+                type: number
+                format: float
+                example: 5.0
+              status:
+                type: string
+                example: "confirmed"
+              created_at:
+                type: string
+                format: date-time
+                example: "2025-01-12T10:30:00"
+        404:
+          description: Транзакция не найдена
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Transaction not found."
+  /transactions/{transaction_id}:
+    get:
+      summary: Получение детальной информации о транзакции
+      description: Возвращает полную информацию о транзакции, включая статус и цвет.
+      parameters:
+        - name: transaction_id
+          in: path
+          required: true
+          type: integer
+          description: ID транзакции.
+      responses:
+        200:
+          description: Информация о транзакции
+          schema:
+            type: object
+            properties:
+              id:
+                type: integer
+                example: 123
+              amount:
+                type: number
+                format: float
+                example: 100.0
+              status:
+                type: string
+                example: "confirmed"
+              created_at:
+                type: string
+                format: date-time
+                example: "2025-01-12T10:30:00"
+        404:
+          description: Транзакция не найдена
+          schema:
+            type: object
+            properties:
+              message:
+                type: string
+                example: "Transaction not found."

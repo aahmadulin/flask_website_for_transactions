@@ -1,0 +1,111 @@
+{% extends "transaction_base.html" %}
+
+{% block content %}
+<div class="container">
+    <h1>Transactions</h1>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Amount</th>
+                <th>Commission</th>
+                <th>Status</th>
+                <th>Created At</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody id="transactions-table-body">
+            {% for transaction in transactions %}
+            <tr>
+                <td>{{ transaction.id }}</td>
+                <td>{{ transaction.amount }}</td>
+                <td>{{ transaction.commission }}</td>
+                <td>
+                    <select class="form-select" id="status-{{ transaction.id }}">
+                        {% for status in ['pending', 'confirmed', 'canceled', 'expired'] %}
+                        <option value="{{ status }}" {% if transaction.status == status %}selected{% endif %}>{{ status }}</option>
+                        {% endfor %}
+                    </select>
+                </td>
+                <td>{{ transaction.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                <td>
+
+                    <a href="{{ url_for('admin.transaction_detail', transaction_id=transaction.id) }}" 
+                       class="btn btn-sm btn-info">View</a>
+
+                    <button class="btn btn-sm btn-primary" onclick="updateStatus({{ transaction.id }})">Save</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<script>
+
+function updateStatus(transactionId) {
+    var status = document.getElementById('status-' + transactionId).value;
+
+    fetch('/admin/transactions/update_status', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            transaction_id: transactionId,
+            status: status
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Status updated successfully') {
+            alert('Status updated successfully');
+            fetchTransactions(); 
+        } else {
+            alert('Error updating status');
+        }
+    });
+}
+
+
+function fetchTransactions() {
+    $.ajax({
+        url: '/admin/transactions/data',
+        method: 'GET',
+        success: function(data) {
+            let tableBody = $('#transactions-table-body');
+            tableBody.empty();
+            data.forEach(function(transaction) {
+                tableBody.append(`
+                    <tr>
+                        <td>${transaction.id}</td>
+                        <td>${transaction.amount}</td>
+                        <td>${transaction.commission}</td>
+                        <td>
+                            <select class="form-select" id="status-${transaction.id}">
+                                <option value="pending" ${transaction.status === 'pending' ? 'selected' : ''}>pending</option>
+                                <option value="confirmed" ${transaction.status === 'confirmed' ? 'selected' : ''}>confirmed</option>
+                                <option value="canceled" ${transaction.status === 'canceled' ? 'selected' : ''}>canceled</option>
+                                <option value="expired" ${transaction.status === 'expired' ? 'selected' : ''}>expired</option>
+                            </select>
+                        </td>
+                        <td>${transaction.created_at}</td>
+                        <td>
+                            <a href="/admin/transactions/${transaction.id}" class="btn btn-sm btn-info">View</a>
+                            <button class="btn btn-sm btn-primary" onclick="updateStatus(${transaction.id})">Save</button>
+                        </td>
+                    </tr>
+                `);
+            });
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching transactions:', error);
+        }
+    });
+}
+
+fetchTransactions();
+
+setInterval(fetchTransactions, 5000);
+</script>
+{% endblock %}

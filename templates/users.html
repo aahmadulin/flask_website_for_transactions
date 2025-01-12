@@ -1,0 +1,199 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Users</h1>
+        <button class="btn btn-primary" data-toggle="modal" data-target="#createUserModal">Create User</button>
+    </div>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Username</th>
+                <th>Commission Rate</th>
+                <th>Role</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+            <tr data-user-id="{{ user.id }}">
+                <td>{{ user.id }}</td>
+                <td>{{ user.username }}</td>
+                <td>{{ user.commission_rate }}</td>
+                <td>{{ user.role }}</td>
+                <td>
+                    <button class="btn btn-sm btn-warning" onclick="editUser({{ user.id }})">Edit</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUser({{ user.id }})">Delete</button>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
+<div class="modal fade" id="createUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create User</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="createUserForm">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-control" name="password" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Commission Rate</label>
+                        <input type="number" step="0.01" class="form-control" name="commission_rate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select class="form-control" name="role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="createUser()">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="modal fade" id="editUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit User</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="editUserForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" id="editUsername" name="username" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-control" id="editPassword" name="password">
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="editEmail" name="email" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Commission Rate</label>
+                        <input type="number" step="0.01" class="form-control" id="editCommissionRate" name="commission_rate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Role</label>
+                        <select class="form-control" id="editRole" name="role">
+                            <option value="user">User</option>
+                            <option value="admin">Admin</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="updateUser()">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function createUser() {
+    const formData = new FormData(document.getElementById('createUserForm'));
+    const data = Object.fromEntries(formData.entries());
+
+    data.commission_rate = parseFloat(data.commission_rate); 
+    data.balance = parseFloat(data.balance);
+    
+    fetch('/admin/users/create', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            location.reload();
+        }
+    });
+}
+
+function editUser(userId) {
+    const user = {
+        id: userId,
+        username: document.querySelector(`tr[data-user-id="${userId}"] td:nth-child(2)`).textContent,
+        commission_rate: document.querySelector(`tr[data-user-id="${userId}"] td:nth-child(3)`).textContent,
+        role: document.querySelector(`tr[data-user-id="${userId}"] td:nth-child(4)`).textContent,
+        email: document.querySelector(`tr[data-user-id="${userId}"] td:nth-child(2)`).textContent // Здесь вам нужно будет поправить логику, если email не в таблице
+    };
+
+    document.getElementById('editUserId').value = user.id;
+    document.getElementById('editUsername').value = user.username;
+    document.getElementById('editCommissionRate').value = user.commission_rate;
+    document.getElementById('editRole').value = user.role;
+    document.getElementById('editEmail').value = user.email;  // добавление email
+
+    $('#editUserModal').modal('show');
+}
+
+function updateUser() {
+    const userId = document.getElementById('editUserId').value;
+    const formData = new FormData(document.getElementById('editUserForm'));
+    const data = Object.fromEntries(formData.entries());
+
+    fetch(`/admin/users/${userId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            location.reload();
+        }
+    });
+}
+
+function deleteUser(userId) {
+    if (confirm('Are you sure you want to delete this user?')) {
+        fetch(`/admin/users/${userId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                location.reload();
+            }
+        });
+    }
+}
+</script>
+{% endblock %}

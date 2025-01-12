@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="text-center">Информация о транзакции #{{ transaction_data.id }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Сумма:</strong>
+                            <p>{{ transaction_data.amount }} руб.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Комиссия:</strong>
+                            <p>{{ transaction_data.commission }} руб.</p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <strong>Статус:</strong>
+                            <p>{{ transaction_data.status }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <strong>Дата создания:</strong>
+                            <p>{{ transaction_data.created_at }}</p>
+                        </div>
+                    </div>
+
+                    <div class="d-flex justify-content-end">
+                        <a href="{{ url_for('admin.transactions') }}" class="btn btn-secondary">Назад</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

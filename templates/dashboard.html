@@ -1,0 +1,94 @@
+<!-- templates/dashboard.html -->
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Дашборд</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa; /* Светлый фон */
+            font-family: 'Arial', sans-serif;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        h1, h3 {
+            color: #343a40;
+        }
+        h3 {
+            margin-top: 30px;
+            font-size: 1.5rem;
+        }
+        p {
+            font-size: 1.1rem;
+            color: #555;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+        li a {
+            font-size: 0.9rem;
+            color: #007bff;
+            text-decoration: none;
+        }
+        li a:hover {
+            text-decoration: underline;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Дашборд</h1>
+
+        <div>
+            <h3>Статистика</h3>
+            <p><strong>Количество пользователей:</strong> {{ users_count }}</p>
+            <p><strong>Количество транзакций:</strong> {{ transactions_count }}</p>
+            <p><strong>Сумма транзакций за сегодня:</strong> {{ today_amount }} руб.</p>
+        </div>
+
+        <div>
+            <h3>Последние транзакции</h3>
+            <ul>
+                {% for transaction in recent_transactions %}
+                    <li>
+                        ID: {{ transaction.id }}, 
+                        Сумма: {{ transaction.amount }} руб., 
+                        Статус: {{ transaction.status }},
+                        Дата: {{ transaction.created_at }}
+                        <a href="{{ url_for('api.transaction_detail', transaction_id=transaction.id) }}">Подробнее в AdminPanel</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <a href="{{ url_for('api.create_transaction') }}" class="btn">Создать транзакцию</a>
+    </div>
+</body>
+</html>
