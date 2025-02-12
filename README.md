@@ -42,3 +42,7 @@
 - `GET /home`: Display the user homepage
 - `GET /profile`: Display the current user profile
 - `GET /about`: Display the about page
+
+![image_2025-02-13_00-36-27](https://github.com/user-attachments/assets/a862466f-15c0-48c1-959b-9f74e705bfea)
+![image_2025-02-13_00-37-52](https://github.com/user-attachments/assets/7e9f8285-0bfc-440a-9f0a-a7ec8b468397)
+![image_2025-02-13_00-38-33](https://github.com/user-attachments/assets/4d086f76-3771-4177-b06f-ebe92138fee8)
